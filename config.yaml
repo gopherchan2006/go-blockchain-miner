@@ -1,0 +1,5 @@
+node:
+  url: "http://localhost:3030"
+miner:
+  address: "a7167ab44ab72ed38c30da8c103701b35bb8ac47"
+  workers: 4
