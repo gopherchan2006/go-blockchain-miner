@@ -14,6 +14,7 @@ type Template struct {
 	Index      int    `json:"index"`
 	Timestamp  int64  `json:"timestamp"`
 	TxData     string `json:"txData"`
+	TxIDs      string `json:"txIDs"`
 	PrevHash   string `json:"prevHash"`
 	Difficulty int    `json:"difficulty"`
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func computeHash(t Template, nonce int) string {
-	raw := fmt.Sprintf("%d%d%s%s%d", t.Index, t.Timestamp, t.TxData, t.PrevHash, nonce)
+	raw := fmt.Sprintf("%d%d%s%s%d", t.Index, t.Timestamp, t.TxIDs, t.PrevHash, nonce)
 	sum := sha256.Sum256([]byte(raw))
 	return fmt.Sprintf("%x", sum)
 }
