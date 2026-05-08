@@ -55,7 +55,15 @@ func main() {
 		}()
 
 		select {
-		case event := <-events:
+		case event, ok := <-events:
+			if !ok {
+				cancelMine()
+				<-doneMine
+				fmt.Println("events stream closed, retrying")
+				time.Sleep(500 * time.Millisecond)
+				events = client.SubscribeEvents(ctx)
+				continue
+			}
 			cancelMine()
 			<-doneMine
 			fmt.Printf("interrupted by event=%s, fetching new template\n", event)
@@ -83,8 +91,12 @@ func main() {
 		}
 
 		select {
-		case event := <-events:
-			fmt.Printf("received event=%s, fetching new template\n", event)
+		case event, ok := <-events:
+			if ok {
+				fmt.Printf("received event=%s, fetching new template\n", event)
+			}
+		case <-time.After(700 * time.Millisecond):
+			fmt.Println("no follow-up event, fetching new template")
 		case <-ctx.Done():
 			fmt.Println("shutting down")
 			return
