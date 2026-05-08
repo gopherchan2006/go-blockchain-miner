@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -29,7 +30,8 @@ func NewNodeClient(baseURL string) *NodeClient {
 }
 
 func (c *NodeClient) FetchTemplate(address string) (Template, error) {
-	resp, err := c.http.Get(fmt.Sprintf("%s/api/blocktemplate?miner=%s", c.baseURL, address))
+	miner := url.QueryEscape(address)
+	resp, err := c.http.Get(fmt.Sprintf("%s/api/blocktemplate?miner=%s", c.baseURL, miner))
 	if err != nil {
 		return Template{}, err
 	}
@@ -96,6 +98,9 @@ func (c *NodeClient) streamEvents(ctx context.Context, ch chan<- string) error {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "event:") {
 			event := strings.TrimSpace(strings.TrimPrefix(line, "event:"))
+			if !shouldForwardEvent(event) {
+				continue
+			}
 			select {
 			case ch <- event:
 			case <-ctx.Done():
@@ -104,4 +109,13 @@ func (c *NodeClient) streamEvents(ctx context.Context, ch chan<- string) error {
 		}
 	}
 	return scanner.Err()
+}
+
+func shouldForwardEvent(event string) bool {
+	switch event {
+	case "new_block", "block_mined", "new_tx":
+		return true
+	default:
+		return false
+	}
 }
